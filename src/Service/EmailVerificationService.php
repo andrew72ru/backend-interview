@@ -17,21 +17,23 @@ class EmailVerificationService
         EmailVerificationRepository $repository,
         EmailVerificationClient $client,
         EntityManagerInterface $entityManager,
+        string $dateTimeInterval,
     ) {
         $this->repository = $repository;
         $this->client = $client;
         $this->entityManager = $entityManager;
     }
 
-    public function verify(Email $email)
+    public function verify(Email $email): void
     {
+        // TODO client exceptions must be caught
         $result = $this->client->verify($email->getEmail());
         if ($result) {
             $verification = (new EmailVerification())
                 ->setResult($result['result'] ?? '')
                 ->setCreatedAt(new DateTimeImmutable())
-                ->setIsCatchall(boolval($result['catchall'] ?? false))
-                ->setIsDisposable(boolval($result['disposable'] ?? false))
+                ->setIsCatchall((bool) ($result['catchall'] ?? false))
+                ->setIsDisposable((bool) ($result['disposable'] ?? false))
                 ->setIsDnsValidMx(boolval($result['dnsValidMx'] ?? false))
                 ->setIsFreemail(boolval($result['freemail'] ?? false))
                 ->setIsPrivate(boolval($result['isPrivate'] ?? false))
@@ -43,7 +45,11 @@ class EmailVerificationService
             $email->setLastVerifiedAt($verification->getCreatedAt());
 
             $this->repository->add($verification, true);
-
         }
+    }
+
+    private function makeDateCache(): \DateTimeInterface
+    {
+
     }
 }

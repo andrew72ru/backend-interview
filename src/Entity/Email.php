@@ -17,32 +17,32 @@ class Email implements JsonSerializable
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private int | null $id = null;
 
     #[ORM\Column(type: 'string', length: 45, unique: true)]
     #[Assert\Email]
-    private $email;
+    private string | null $email;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private $createdAt;
+    private \DateTimeImmutable | null $createdAt;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $lastVerifiedAt = null;
+    private \DateTimeImmutable | null $lastVerifiedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'email', targetEntity: EmailVerification::class, cascade: ["all"], orphanRemoval: true)]
-    private $emailVerifications;
-
-    #[ORM\PrePersist]
-    public function prePersist()
-    {
-        if (empty($this->createdAt)) {
-            $this->createdAt = new DateTimeImmutable();
-        }
-    }
+    private Collection $emailVerifications;
 
     public function __construct()
     {
         $this->emailVerifications = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function prePersist(): void
+    {
+        if (empty($this->createdAt)) {
+            $this->createdAt = new DateTimeImmutable();
+        }
     }
 
     public function getId(): ?int
@@ -126,7 +126,7 @@ class Email implements JsonSerializable
         return [
             'id' => $this->getId(),
             'email' => $this->getEmail(),
-            'createdAt' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
+            'createdAt' => $this->getCreatedAt()?->format('Y-m-d H:i:s'),
             'verification' => $this->getLastVerification(),
         ];
     }

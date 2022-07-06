@@ -13,5 +13,6 @@ framework:
             # sync: 'sync://'
 
         routing:
+            App\Messenger\Message\EmailMessage: async
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
